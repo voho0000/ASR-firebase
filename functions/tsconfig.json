@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": false, //for Parsing error: 
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2017",
+    "skipLibCheck": true, // from GPT
+    // "esModuleInterop": true, // from GPT for formData
+  },
+  "compileOnSave": true,
+  "include": [
+    "src"
+  ]
+}
