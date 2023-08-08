@@ -24,20 +24,21 @@ export const uploadFile = functions.https.onRequest((req, res) => {
     // eslint-disable-next-line new-cap
     const busboy = Busboy({ headers: req.headers });
 
-    let prompt: string;
-    let patientId: string;
-    let userId: string;
+    // Next version
+    // let prompt: string;
+    // let patientId: string;
+    // let userId: string;
 
-    busboy.on("field", (fieldname, value) => {
-      // Capture the fields
-      if (fieldname === "prompt") {
-        prompt = value;
-      } else if (fieldname === "patientId") {
-        patientId = value;
-      } else if (fieldname === "userId") {
-        userId = value;
-      }
-    });
+    // busboy.on("field", (fieldname, value) => {
+    //   // Capture the fields
+    //   if (fieldname === "prompt") {
+    //     prompt = value;
+    //   } else if (fieldname === "patientId") {
+    //     patientId = value;
+    //   } else if (fieldname === "userId") {
+    //     userId = value;
+    //   }
+    // });
 
     busboy.on(
       "file",
@@ -77,41 +78,42 @@ export const uploadFile = functions.https.onRequest((req, res) => {
             }); // Send back the transcribed text
             logger.info("transcript:", newASRResponse);
 
-            try {
-              // Check user authentication
-              if (!userId) {
-                throw new Error("User not authenticated, please log in again");
-              }
+            // Next version
+            // try {
+            //   // Check user authentication
+            //   if (!userId) {
+            //     throw new Error("User not authenticated, please log in");
+            //   }
 
-              const db = admin.firestore();
-              const patientRecordRef = db
-                .collection("PatientRecords")
-                .doc(userId)
-                .collection("PatientRecord")
-                .doc(patientId);
+            //   const db = admin.firestore();
+            //   const patientRecordRef = db
+            //     .collection("PatientRecords")
+            //     .doc(userId)
+            //     .collection("PatientRecord")
+            //     .doc(patientId);
 
-              // Fetch the existing data
-              const patientRecordSnap = await patientRecordRef.get();
+            //   // Fetch the existing data
+            //   const patientRecordSnap = await patientRecordRef.get();
 
-              if (!patientRecordSnap.exists) {
-                throw new Error(`Failed to fetch patient record: ${patientId}`);
-              }
+            //   if (!patientRecordSnap.exists) {
+            //     throw new Error(`Failed to get patient record:${patientId}`);
+            //   }
 
-              const existingASRResponse =
-                patientRecordSnap.data()?.asrResponse || "";
+            //   const existingASRResponse =
+            //     patientRecordSnap.data()?.asrResponse || "";
 
-              // Concatenate the new response to the existing response
-              const updatedASRResponse =
-                existingASRResponse + " " + newASRResponse;
+            //   // Concatenate the new response to the existing response
+            //   const updatedASRResponse =
+            //     existingASRResponse + " " + newASRResponse;
 
-              // Update the document with the new asrResponse
-              await patientRecordRef.update({
-                asrResponse: updatedASRResponse,
-              });
-            } catch (error) {
-              console.error(error); // handle the error as needed
-              throw error; // re-throw the error after handling it
-            }
+            //   // Update the document with the new asrResponse
+            //   await patientRecordRef.update({
+            //     asrResponse: updatedASRResponse,
+            //   });
+            // } catch (error) {
+            //   console.error(error); // handle the error as needed
+            //   throw error; // re-throw the error after handling it
+            // }
           } else {
             console.log("Failed to transcribe audio:", response.data);
             res.status(500).json({
@@ -157,8 +159,9 @@ export const callGPTAPI = functions.https.onCall(async (data, context) => {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${OPENAI_API_KEY}`,
   };
-  const uid = context.auth?.uid;
-  logger.info("User ID:", uid);
+  // next version
+  // const uid = context.auth?.uid;
+  // logger.info("User ID:", uid);
 
   logger.info("gptModel:", gptModel);
   logger.info("inputText:", inputText);
