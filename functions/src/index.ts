@@ -52,9 +52,9 @@ export const uploadFile = functions.https.onRequest((req, res) => {
         });
         // Append the model
         formData.append("model", "whisper-1");
-        if (prompt) {
-          formData.append("prompt", prompt);
-        }
+        // if (prompt) {
+        //   formData.append("prompt", prompt);
+        // }
         const headers = { Authorization: `Bearer ${OPENAI_API_KEY}` };
 
         try {
@@ -145,6 +145,7 @@ export const uploadFile = functions.https.onRequest((req, res) => {
 });
 
 export const callGPTAPI = functions.https.onCall(async (data, context) => {
+  logger.info("Received data:", data);
   const { inputText, promptContent, gptModel } = data;
   const content = {
     model: gptModel,
@@ -159,9 +160,11 @@ export const callGPTAPI = functions.https.onCall(async (data, context) => {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${OPENAI_API_KEY}`,
   };
-  // next version
-  // const uid = context.auth?.uid;
-  // logger.info("User ID:", uid);
+
+  if (content) {
+    const uid = context.auth?.uid;
+    logger.info("User ID:", uid);
+  }
 
   logger.info("gptModel:", gptModel);
   logger.info("inputText:", inputText);
