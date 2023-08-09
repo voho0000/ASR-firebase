@@ -15,8 +15,8 @@ type FileInfo = {
 };
 const OPENAI_API_KEY = functions.config().openai.key;
 export const uploadFile = functions.https.onRequest((req, res) => {
-  // console.log("req.headers", req.headers);
-  // console.log("req.body", req.body);
+  logger.info("req.headers: ", req.headers);
+  logger.info("req.body: ", req.body);
   if (req.method !== "POST") {
     // Only allow POST
     res.status(405).send("Only allowed POST");
@@ -43,7 +43,7 @@ export const uploadFile = functions.https.onRequest((req, res) => {
     busboy.on(
       "file",
       async (fieldname: string, file: Stream, fileinfo: FileInfo) => {
-        console.log("File [" + fieldname + "]: filename: ", fileinfo.filename);
+        logger.info("File [" + fieldname + "]: filename: ", fileinfo.filename);
         const formData = new FormData();
         // Append the file to formData
         formData.append("file", file, {
@@ -55,6 +55,7 @@ export const uploadFile = functions.https.onRequest((req, res) => {
         // if (prompt) {
         //   formData.append("prompt", prompt);
         // }
+        logger.info("formData: ", formData);
         const headers = { Authorization: `Bearer ${OPENAI_API_KEY}` };
 
         try {
