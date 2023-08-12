@@ -29,21 +29,20 @@ export const uploadFile = functions.https.onRequest((req, res) => {
       // eslint-disable-next-line new-cap
       const busboy = Busboy({ headers: req.headers });
 
-      // Next version
-      // let prompt: string;
+      let prompt: string;
       // let patientId: string;
       // let userId: string;
 
-      // busboy.on("field", (fieldname, value) => {
-      //   // Capture the fields
-      //   if (fieldname === "prompt") {
-      //     prompt = value;
-      //   } else if (fieldname === "patientId") {
-      //     patientId = value;
-      //   } else if (fieldname === "userId") {
-      //     userId = value;
-      //   }
-      // });
+      busboy.on("field", (fieldname, value) => {
+        // Capture the fields
+        if (fieldname === "prompt") {
+          prompt = value;
+        } // else if (fieldname === "patientId") {
+        //   patientId = value;
+        // } else if (fieldname === "userId") {
+        //   userId = value;
+        // }
+      });
 
       busboy.on(
         "file",
@@ -56,9 +55,10 @@ export const uploadFile = functions.https.onRequest((req, res) => {
           });
           // Append the model
           formData.append("model", "whisper-1");
-          // if (prompt) {
-          //   formData.append("prompt", prompt);
-          // }
+          if (prompt) {
+            formData.append("prompt", prompt);
+            logger.info("Prompt:", prompt);
+          }
           const headers = { Authorization: `Bearer ${OPENAI_API_KEY}` };
 
           try {
@@ -194,4 +194,45 @@ export const callGPTAPI = functions.https.onCall(async (data, context) => {
     logger.error("Failed to call GPT API:", error);
     throw new functions.https.HttpsError("internal", "Failed to call GPT API");
   }
+});
+
+export const addDefaultPrompts = functions.https.onCall(async (data) => {
+  const userId = data.userId;
+  if (!userId) {
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "User ID is required"
+    );
+  }
+  const db = admin.firestore();
+  try {
+    await db.doc(`Prompts/${userId}/prompt/blank`).set({
+      promptContent: "",
+    });
+    await db.doc(`Prompts/${userId}/prompt/present illness`).set({
+      promptContent:
+        "You are a doctor helper. The following text is oral history. " +
+        "Please transform the following text as a professional medical note " +
+        "of present illness of admission note in English.",
+    });
+    await db.doc(`Prompts/${userId}/prompt/take history`).set({
+      promptContent:
+        "The following texts is the conversation of a patient and a doctor. " +
+        "please summary the history of this patient it as a present" +
+        "illness part of admission note",
+    });
+    await db.doc(`Prompts/${userId}/prompt/ask medical`).set({
+      promptContent:
+        "You are a medical assistant. Please answer the question based on  " +
+        "clinical research results and provide detailed explanations. " +
+        "No need for disclaimers.",
+    });
+  } catch (error) {
+    logger.error("Failed to create Prompts:", error);
+    if (error instanceof Error) {
+      throw new functions.https.HttpsError("unknown", error.message);
+    }
+  }
+
+  return { success: true };
 });
