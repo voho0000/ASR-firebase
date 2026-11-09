@@ -77,3 +77,13 @@ This project contains a collection of Firebase Cloud Functions that allow audio 
 ## Error Handling
 
 Errors during the transcription or GPT model interaction are logged to the Firebase Functions log. If an error occurs, the client will receive a 500 status code and a JSON object describing the error.
+
+## OpenAI key and deployment
+
+The `uploadFile` and `callGPTAPI` functions use the `OPENAI_API_KEY` secret.
+Create a new secret version through `firebase functions:secrets:set OPENAI_API_KEY`
+for project `gpt-medical-note`, then redeploy both functions. Never commit the
+key or copy it into the frontend. Secret changes require a redeploy to take effect.
+
+The deployed functions run on Node.js 22. Run `npm ci`, `npm run lint`, and
+`npm run build` inside `functions/` before deploying.

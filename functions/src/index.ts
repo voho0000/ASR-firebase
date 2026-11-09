@@ -62,16 +62,15 @@ export const uploadFile = apiFunctions.https.onRequest((req, res) => {
               throw new Error("Failed to transcribe audio");
             }
 
-            if (response.data) {
-              const newASRResponse = response.data.text;
-              res.status(200).json({
-                transcript: newASRResponse,
+            const transcript = response.data?.text;
+            if (typeof transcript !== "string" || !transcript.trim()) {
+              res.status(422).json({
+                code: "NO_SPEECH",
+                error: "No speech was recognized. Check microphone input.",
               });
-            } else {
-              res.status(500).json({
-                error: "Failed to transcribe audio.",
-              });
-            } // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+              return;
+            }
+            res.status(200).json({ transcript });
           } catch (error: unknown) {
             handleError(error, res);
           }
